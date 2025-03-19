@@ -4,16 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PRS-DM</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             background-color: #f4f4f4;
-        }
-
-        h2 {
-            color: #333;
         }
 
         .pdf-list {
@@ -29,11 +24,11 @@
             text-align: center;
         }
 
-            .pdf-item canvas {
-                width: 100%;
-                border-radius: 10px;
-                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            }
+        .pdf-item img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
         .pdf-title {
             margin-top: 8px;
@@ -47,70 +42,40 @@
     <div class="pdf-list">
         <div class="pdf-item" onclick="openPDF('Ping_Roun_Group_Catalogue_2025.02.26.pdf')">
             <p class="pdf-title">Ping Roun Group Catalogue</p>
-            <canvas id="pdf-thumbnail-1"></canvas>
+            <img src="DM-EN.png" alt="Thumbnail 1">
         </div>
         <div class="pdf-item" onclick="openPDF('屏榮食品中文產品目錄2025.02.26.pdf')">
             <p class="pdf-title">屏榮食品中文產品目錄</p>
-            <canvas id="pdf-thumbnail-2"></canvas>
+            <img src="DM-CN.png" alt="Thumbnail 2">
         </div>
         <div class="pdf-item" onclick="openPDF('屛栄食品グループカタログ 2025.02.22.pdf')">
             <p class="pdf-title">屛栄食品グループカタログ</p>
-            <canvas id="pdf-thumbnail-3"></canvas>
+            <img src="DM-JP.png" alt="Thumbnail 3">
         </div>
     </div>
 
     <script>
-        // Hàm mở file PDF nhanh hơn bằng cách mở trong tab mới
+        // Tải trước file PDF để lưu vào cache
+        const pdfUrls = [
+            "Ping_Roun_Group_Catalogue_2025.02.26.pdf",
+            "屏榮食品中文產品目錄2025.02.26.pdf",
+            "屛栄食品グループカタログ 2025.02.22.pdf"
+        ];
+
+        function preloadPDFs() {
+            pdfUrls.forEach(url => {
+                fetch(url, { method: "HEAD" })
+                    .then(() => console.log(`Preloaded: ${url}`))
+                    .catch(err => console.error(`Lỗi tải trước: ${url}`, err));
+            });
+        }
+
         function openPDF(pdfUrl) {
             window.open(pdfUrl, "_blank");
         }
 
-        // Hàm tạo ảnh thumbnail
-        async function generateThumbnail(pdfUrl, canvasId) {
-            try {
-                const loadingTask = pdfjsLib.getDocument(pdfUrl);
-                const pdf = await loadingTask.promise;
-                const page = await pdf.getPage(1); // Lấy trang đầu tiên
-
-                const scale = 1.5;
-                const viewport = page.getViewport({ scale });
-
-                const canvas = document.getElementById(canvasId);
-                if (!canvas) return;
-
-                const context = canvas.getContext("2d");
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-
-                await page.render({ canvasContext: context, viewport: viewport }).promise;
-            } catch (error) {
-                console.error("Lỗi khi tạo thumbnail:", error);
-            }
-        }
-
-        // Hàm tải trước file PDF để mở nhanh hơn
-        function preloadPDFs() {
-            const pdfFiles = [
-                "Ping_Roun_Group_Catalogue_2025.02.26.pdf",
-                "屏榮食品中文產品目錄2025.02.26.pdf",
-                "屛栄食品グループカタログ 2025.02.22.pdf"
-            ];
-
-            pdfFiles.forEach(file => {
-                const iframe = document.createElement("iframe");
-                iframe.src = file;
-                iframe.style.display = "none"; // Ẩn đi
-                document.body.appendChild(iframe);
-            });
-        }
-
-        // Chạy khi trang load
-        window.onload = function () {
-            preloadPDFs();
-            generateThumbnail("Ping_Roun_Group_Catalogue_2025.02.26.pdf", "pdf-thumbnail-1");
-            generateThumbnail("屏榮食品中文產品目錄2025.02.26.pdf", "pdf-thumbnail-2");
-            generateThumbnail("屛栄食品グループカタログ 2025.02.22.pdf", "pdf-thumbnail-3");
-        };
+        // Chạy preload khi trang vừa load
+        window.onload = preloadPDFs;
     </script>
 </body>
 </html>
