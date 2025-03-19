@@ -24,7 +24,6 @@
         }
 
         .pdf-item {
-            position: relative;
             width: 200px;
             cursor: pointer;
             text-align: center;
@@ -34,29 +33,6 @@
                 width: 100%;
                 border-radius: 10px;
                 box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            }
-
-            .pdf-item:hover .preview {
-                display: block;
-            }
-
-        .preview {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            background: white;
-            border: 1px solid #ccc;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            z-index: 10;
-        }
-
-            .preview iframe {
-                width: 100%;
-                height: 400px;
             }
 
         .pdf-title {
@@ -69,39 +45,27 @@
 </head>
 <body>
     <div class="pdf-list">
-        <div class="pdf-item">
+        <div class="pdf-item" onclick="openPdf('Ping_Roun_Group_Catalogue_2025.02.26.pdf')">
             <p class="pdf-title">Ping Roun Group Catalogue</p>
-
-            <a href="Ping_Roun_Group_Catalogue_2025.02.26.pdf" target="_blank">
-                <canvas id="pdf-thumbnail-1"></canvas>
-            </a>
-            <div class="preview">
-                <iframe src="Ping_Roun_Group_Catalogue_2025.02.26.pdf"></iframe>
-            </div>
+            <canvas id="pdf-thumbnail-1"></canvas>
         </div>
-        <div class="pdf-item">
+        <div class="pdf-item" onclick="openPdf('屏榮食品中文產品目錄2025.02.26.pdf')">
             <p class="pdf-title">屏榮食品中文產品目錄</p>
-
-            <a href="屏榮食品中文產品目錄2025.02.26.pdf" target="_blank">
-                <canvas id="pdf-thumbnail-2"></canvas>
-            </a>
-            <div class="preview">
-                <iframe src="屏榮食品中文產品目錄2025.02.26.pdf"></iframe>
-            </div>
+            <canvas id="pdf-thumbnail-2"></canvas>
         </div>
-        <div class="pdf-item">
+        <div class="pdf-item" onclick="openPdf('屛栄食品グループカタログ 2025.02.22.pdf')">
             <p class="pdf-title">屛栄食品グループカタログ</p>
-
-            <a href="屛栄食品グループカタログ 2025.02.22.pdf" target="_blank">
-                <canvas id="pdf-thumbnail-3"></canvas>
-            </a>
-            <div class="preview">
-                <iframe src="屛栄食品グループカタログ 2025.02.22.pdf"></iframe>
-            </div>
+            <canvas id="pdf-thumbnail-3"></canvas>
         </div>
     </div>
 
     <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js";
+
+        function openPdf(pdfUrl) {
+            window.open(pdfUrl, "_blank");
+        }
+
         async function generateThumbnail(pdfUrl, canvasId) {
             try {
                 console.log("Đang tải file PDF:", pdfUrl);
@@ -110,7 +74,7 @@
                 const pdf = await loadingTask.promise;
                 const page = await pdf.getPage(1); // Lấy trang đầu tiên
 
-                const scale = 1.5;
+                const scale = 1.0; // Giảm scale để tăng tốc độ
                 const viewport = page.getViewport({ scale });
 
                 const canvas = document.getElementById(canvasId);
@@ -136,9 +100,17 @@
             }
         }
 
-        generateThumbnail("Ping_Roun_Group_Catalogue_2025.02.26.pdf", "pdf-thumbnail-1");
-        generateThumbnail("屏榮食品中文產品目錄2025.02.26.pdf", "pdf-thumbnail-2");
-        generateThumbnail("屛栄食品グループカタログ 2025.02.22.pdf", "pdf-thumbnail-3");
+        async function loadAllThumbnails() {
+            const files = [
+                { url: "Ping_Roun_Group_Catalogue_2025.02.26.pdf", id: "pdf-thumbnail-1" },
+                { url: "屏榮食品中文產品目錄2025.02.26.pdf", id: "pdf-thumbnail-2" },
+                { url: "屛栄食品グループカタログ 2025.02.22.pdf", id: "pdf-thumbnail-3" }
+            ];
+
+            await Promise.all(files.map(file => generateThumbnail(file.url, file.id)));
+        }
+
+        loadAllThumbnails();
     </script>
 </body>
 </html>
